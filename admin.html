@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel Administrativo | Mafran Acessórios</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%8B%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+<div id="toast-stack" aria-live="polite"></div>
+
+<!-- ===================== LOGIN GATE ===================== -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="brand" style="justify-content: center; margin-bottom: 24px;">
+      <img src="img/logo-transparent.png" alt="Mafran Acessórios" class="brand-logo" style="height: 48px; object-fit: contain;" />
+    </div>
+
+    <div id="gate-login">
+      <p>Acesso restrito à equipe Mafran. Entre com sua conta Google autorizada para gerenciar produtos, estoque e pedidos.</p>
+      <button class="google-btn" id="google-login-btn">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4c-7.6 0-14.1 4.3-17.4 10.6z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6c-2 1.5-4.6 2.5-7.7 2.5-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 39.6 16.4 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.4l6.6 5.6C41.5 35.9 44 30.4 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Entrar com Google
+      </button>
+      <div class="gate-status" id="gate-status" hidden><span class="spinner"></span> Verificando acesso...</div>
+    </div>
+
+    <div class="gate-denied" id="gate-denied">
+      <div class="divider-heart">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M12 21s-7.5-4.9-10-9.3C.4 8.1 2 4.5 5.6 4.1c2-.2 3.9.8 5 2.4 1.1-1.6 3-2.6 5-2.4 3.6.4 5.2 4 3.6 7.6-2.5 4.4-10 9.3-10 9.3z"/></svg>
+      </div>
+      <p>Este e-mail não tem permissão para acessar o painel:</p>
+      <div class="email-chip" id="denied-email"></div>
+      <button class="btn btn-outline" id="switch-account-btn" style="width:100%">Entrar com outra conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN SHELL ===================== -->
+<div class="admin-shell" id="admin-shell">
+  <div class="sidebar-scrim" id="sidebar-scrim"></div>
+
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="brand">
+      <span class="brand-mark" style="color:var(--gold-400)">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 21c-4-11-17-15-21-7-3 6 2 14 11 15-7 2-10 9-5 14 4 4 13 2 15-7"/>
+          <path d="M32 21c4-11 17-15 21-7 3 6-2 14-11 15 7 2 10 9 5 14-4 4-13 2-15-7"/>
+          <path d="M32 19v22"/>
+        </svg>
+      </span>
+      <span class="brand-name">Mafran</span>
+    </div>
+    <nav class="admin-nav" id="admin-nav">
+      <button data-panel="overview" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.4"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.4"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.4"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.4"/></svg>Visão geral</button>
+      <button data-panel="produtos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5L12 3l8.5 4.5V16L12 21l-8.5-5V7.5z"/><path d="M3.7 7.6L12 12l8.3-4.4"/><path d="M12 12v9"/></svg>Produtos &amp; estoque</button>
+      <button data-panel="pedidos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg>Pedidos</button>
+      <button data-panel="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></svg>Clientes</button>
+      <button data-panel="categorias"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Categorias</button>
+      <button data-panel="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.5V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.5 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Configurações</button>
+    </nav>
+    <div class="admin-user">
+      <div class="admin-user-row">
+        <img id="user-photo" src="" alt="" />
+        <div>
+          <div class="u-name" id="user-name"></div>
+          <div class="u-email" id="user-email"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="logout-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Sair</button>
+    </div>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div class="mobile-topbar">
+      <button class="btn-icon" id="open-sidebar-btn" style="background:rgba(255,255,255,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"/></svg>
+      </button>
+      <div class="brand">
+        <span class="brand-mark" style="color:var(--gold-400)">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 21c-4-11-17-15-21-7-3 6 2 14 11 15-7 2-10 9-5 14 4 4 13 2 15-7"/><path d="M32 21c4-11 17-15 21-7 3 6-2 14-11 15 7 2 10 9 5 14-4 4-13 2-15-7"/><path d="M32 19v22"/></svg>
+        </span>
+        <span class="brand-name">Mafran</span>
+      </div>
+      <span style="width:40px"></span>
+    </div>
+
+    <main class="admin-main">
+      <!-- ============ VISÃO GERAL ============ -->
+      <section class="panel active" id="panel-overview">
+        <div class="admin-topbar">
+          <div>
+            <h1>Visão geral</h1>
+            <p class="sub">Resumo rápido da sua loja</p>
+          </div>
+        </div>
+
+        <div class="seed-banner" id="seed-banner">
+          <div>
+            <strong>Catálogo vazio?</strong>
+            <p>Carregue 15 produtos de exemplo (aço inoxidável) para ver a vitrine funcionando e depois edite tudo à vontade.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="seed-btn">Carregar produtos de exemplo</button>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="label">Produtos ativos</div>
+            <div class="value" id="stat-ativos">–</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Peças em estoque</div>
+            <div class="value" id="stat-estoque">–</div>
+          </div>
+          <div class="stat-card warn">
+            <div class="label">Sem estoque</div>
+            <div class="value" id="stat-esgotado">–</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Pedidos novos</div>
+            <div class="value" id="stat-pedidos">–</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Clientes cadastrados</div>
+            <div class="value" id="stat-clientes">–</div>
+          </div>
+        </div>
+
+        <div class="table-card" style="padding:6px 0">
+          <div style="padding:14px 18px 4px"><strong style="font-family:var(--font-display)">Estoque baixo</strong></div>
+          <table class="p-table">
+            <tbody id="low-stock-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ PRODUTOS ============ -->
+      <section class="panel" id="panel-produtos">
+        <div class="admin-topbar">
+          <div>
+            <h1>Produtos &amp; estoque</h1>
+            <p class="sub">Cadastre peças, controle preços e quantidade disponível</p>
+          </div>
+          <button class="btn btn-primary" id="new-product-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"/></svg>
+            Novo produto
+          </button>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>
+              <input type="search" id="search-input" placeholder="Buscar produto..." />
+            </div>
+            <select class="select-filter" id="filter-categoria"><option value="">Todas categorias</option></select>
+            <select class="select-filter" id="filter-status">
+              <option value="">Todos status</option>
+              <option value="ativo">Ativos</option>
+              <option value="inativo">Inativos</option>
+              <option value="esgotado">Sem estoque</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table class="p-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="produtos-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="produtos-empty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5L12 3l8.5 4.5V16L12 21l-8.5-5V7.5z"/></svg>
+            <p>Nenhum produto encontrado.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PEDIDOS ============ -->
+      <section class="panel" id="panel-pedidos">
+        <div class="admin-topbar">
+          <div>
+            <h1>Pedidos</h1>
+            <p class="sub">Histórico de pedidos enviados pelo catálogo</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <select class="select-filter" id="filter-pedido-status">
+              <option value="">Todos status</option>
+              <option value="novo">Novo</option>
+              <option value="andamento">Em andamento</option>
+              <option value="concluido">Concluído</option>
+            </select>
+          </div>
+        </div>
+        <div id="pedidos-list"></div>
+        <div class="empty-state" id="pedidos-empty" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/></svg>
+          <p>Nenhum pedido por aqui ainda.</p>
+        </div>
+      </section>
+
+      <!-- ============ CLIENTES ============ -->
+      <section class="panel" id="panel-clientes">
+        <div class="admin-topbar">
+          <div>
+            <h1>Clientes</h1>
+            <p class="sub">Cadastros feitos pelo catálogo (login Google) ou direto por aqui</p>
+          </div>
+          <button class="btn btn-primary" id="new-client-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"/></svg>
+            Novo cliente
+          </button>
+        </div>
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>
+              <input type="search" id="clientes-search-input" placeholder="Buscar cliente..." />
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <table class="p-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>WhatsApp</th>
+                <th>E-mail</th>
+                <th>Cadastrado em</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clientes-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="clientes-empty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></svg>
+            <p>Nenhum cliente cadastrado ainda.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CATEGORIAS ============ -->
+      <section class="panel" id="panel-categorias">
+        <div class="admin-topbar">
+          <div>
+            <h1>Categorias</h1>
+            <p class="sub">Organize os grupos de produtos do seu catálogo</p>
+          </div>
+          <button class="btn btn-primary" id="new-category-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"/></svg>
+            Nova categoria
+          </button>
+        </div>
+        <div class="table-card">
+          <table class="p-table">
+            <thead>
+              <tr>
+                <th>Nome da categoria</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="categorias-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="categorias-empty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <p>Nenhuma categoria cadastrada ainda.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CONFIGURAÇÕES ============ -->
+      <section class="panel" id="panel-config">
+        <div class="admin-topbar">
+          <div>
+            <h1>Configurações da loja</h1>
+            <p class="sub">Esses dados aparecem no catálogo público, na seção "Nossa loja" e nos links de WhatsApp</p>
+          </div>
+        </div>
+        <div class="settings-card">
+          <form id="config-form" method="POST">
+            <h3 style="font-size:1.02rem; font-weight:600; margin-bottom:14px; color:var(--forest-900);">Informações Principais</h3>
+            <div class="field">
+              <label for="cfg-nome">Nome da loja</label>
+              <input type="text" id="cfg-nome" name="nomeLoja" placeholder="Mafran Acessórios" />
+            </div>
+            <div class="field">
+              <label for="cfg-whatsapp">WhatsApp da loja (só números, com DDI+DDD)</label>
+              <input type="text" id="cfg-whatsapp" name="whatsapp" placeholder="5511987654321" />
+              <p class="field-hint">É para este número que os pedidos do catálogo serão enviados.</p>
+            </div>
+
+            <h3 style="font-size:1.02rem; font-weight:600; margin:22px 0 14px; color:var(--forest-900); border-top:1px solid var(--line); padding-top:18px;">Página Inicial — Seção "Nossa Loja" & Contato</h3>
+
+            <div class="field">
+              <label for="cfg-endereco">Endereço / Retirada</label>
+              <input type="text" id="cfg-endereco" name="endereco" placeholder="Endereço combinado pelo WhatsApp" />
+              <p class="field-hint">Texto exibido ao lado do ícone de localização na página inicial.</p>
+            </div>
+
+            <div class="field">
+              <label for="cfg-horario">Horário de atendimento</label>
+              <input type="text" id="cfg-horario" name="horario" placeholder="Seg a Sáb, 9h às 18h" />
+              <p class="field-hint">Texto exibido ao lado do ícone de relógio na página inicial.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="cfg-instagram">Instagram (usuário @ ou link)</label>
+                <input type="text" id="cfg-instagram" name="instagram" placeholder="usemafran ou @usemafran" />
+                <p class="field-hint">Ex: @usemafran ou https://instagram.com/usemafran</p>
+              </div>
+              <div class="field">
+                <label for="cfg-instagram-btn">Texto do botão Instagram</label>
+                <input type="text" id="cfg-instagram-btn" name="instagramBtnText" placeholder="Seguir no Instagram" />
+                <p class="field-hint">Texto do botão na página inicial.</p>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:12px;">Salvar configurações</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ===================== MODAL CATEGORIA ===================== -->
+<div class="modal-overlay" id="categoria-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="categoria-modal-title">Nova categoria</h3>
+      <button class="modal-close" id="close-categoria-modal" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </div>
+    <form id="categoria-form" method="POST">
+      <input type="hidden" id="cat-id" />
+      <div class="field">
+        <label for="cat-nome">Nome da categoria *</label>
+        <input type="text" id="cat-nome" required maxlength="100" placeholder="Ex: Colares" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="button" class="btn btn-ghost" id="delete-categoria-btn" style="display:none">Excluir</button>
+        <button type="submit" class="btn btn-primary" style="flex:1">Salvar categoria</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL CLIENTE ===================== -->
+<div class="modal-overlay" id="client-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="client-modal-title">Novo cliente</h3>
+      <button class="modal-close" id="close-client-modal" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </div>
+    <form id="client-form" method="POST">
+      <input type="hidden" id="c-id" />
+      <div class="field">
+        <label for="c-nome">Nome *</label>
+        <input type="text" id="c-nome" required maxlength="120" placeholder="Ex: Maria Silva" />
+      </div>
+      <div class="field">
+        <label for="c-telefone">WhatsApp *</label>
+        <input type="text" id="c-telefone" required maxlength="40" placeholder="(11) 98765-4321" />
+      </div>
+      <div class="field">
+        <label for="c-email">E-mail</label>
+        <input type="email" id="c-email" maxlength="200" placeholder="opcional" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="button" class="btn btn-ghost" id="delete-client-btn" style="display:none">Excluir</button>
+        <button type="submit" class="btn btn-primary" style="flex:1">Salvar cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL PRODUTO ===================== -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="product-modal-title">Novo produto</h3>
+      <button class="modal-close" id="close-product-modal" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="width:16px;height:16px"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </div>
+    <form id="product-form" method="POST">
+      <input type="hidden" id="p-id" />
+      <div class="field">
+        <label for="p-nome">Nome do produto *</label>
+        <input type="text" id="p-nome" required maxlength="150" placeholder="Ex: Colar Ponto de Luz" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p-categoria">Categoria *</label>
+          <select id="p-categoria" required>
+            <option value="">Selecione uma categoria</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="p-estoque">Estoque *</label>
+          <input type="number" id="p-estoque" min="0" step="1" required placeholder="0" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p-preco">Preço (R$) *</label>
+          <input type="number" id="p-preco" min="0" step="0.01" required placeholder="0,00" />
+        </div>
+        <div class="field">
+          <label for="p-preco-promo">Preço promocional (R$)</label>
+          <input type="number" id="p-preco-promo" min="0" step="0.01" placeholder="opcional" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Fotos do produto (até 4)</label>
+        <div class="image-upload-zone" id="p-image-zone">
+          <input type="file" id="p-image-file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" class="visually-hidden" multiple />
+          
+          <div class="image-upload-empty" id="p-image-empty">
+            <div class="upload-icon-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="3" ry="3"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <div class="upload-text-group">
+              <span class="upload-prompt"><strong>Escolher fotos</strong> do dispositivo</span>
+              <span class="upload-sub">Clique ou arraste imagens (limite de 4)</span>
+            </div>
+          </div>
+
+          <div class="image-upload-preview" id="p-image-preview" style="display:none; flex-wrap: wrap; gap: 8px;">
+            <!-- Renderizado dinamicamente pelo JS -->
+          </div>
+        </div>
+
+        <div class="url-toggle-wrap">
+          <button type="button" class="url-toggle-btn" id="toggle-url-input-btn">
+            <span>Ou colar links de imagens (URLs separados por vírgula)</span>
+            <svg id="url-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="url-input-collapse" id="url-input-collapse" style="display:none">
+            <input type="text" id="p-imagem-url-input" placeholder="https://ex.com/1.jpg, https://ex.com/2.jpg" style="margin-top:6px" />
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="p-descricao">Descrição curta</label>
+        <textarea id="p-descricao" placeholder="Ex: Corrente fininha com zircônia central."></textarea>
+      </div>
+      <div class="field-row">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink)">
+          <input type="checkbox" id="p-destaque" style="width:auto" /> Destacar na vitrine
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink)">
+          <input type="checkbox" id="p-ativo" style="width:auto" checked /> Produto ativo
+        </label>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="button" class="btn btn-ghost" id="delete-product-btn" style="display:none">Excluir</button>
+        <button type="submit" class="btn btn-primary" style="flex:1">Salvar produto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

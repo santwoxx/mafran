@@ -1,0 +1,113 @@
+rules_version = '2';
+
+// ============================================================
+// MAFRAN ACESSÓRIOS — regras de segurança do Firestore
+// ------------------------------------------------------------
+// Esta é a camada que REALMENTE protege os dados: mesmo que
+// alguém abra o admin.html sem passar pela tela de login, ou
+// altere o código no navegador, o Firestore vai recusar
+// qualquer escrita de quem não estiver nesta lista de e-mails.
+//
+// IMPORTANTE: mantenha esta lista sempre igual à constante
+// ADMIN_EMAILS em js/firebase-config.js.
+// ============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.email_verified == true &&
+             request.auth.token.email in [
+               'soumafran@gmail.com',
+               'brisasofc@gmail.com',
+               'isaacbomfim.00@gmail.com'
+             ];
+    }
+
+    // Além de checar QUEM pode escrever, valida O FORMATO do dado — assim,
+    // mesmo que alguém chame a API do Firestore direto (sem passar pelo
+    // site), não consegue gravar pedidos/cadastros forjados ou vazios.
+    function isNonEmptyString(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+
+    function isValidPedido(data) {
+      return data.keys().hasOnly(['itens', 'total', 'cliente', 'clienteUid', 'status', 'criadoEm']) &&
+             data.status == 'novo' &&
+             data.total is number && data.total >= 0 &&
+             data.itens is list && data.itens.size() > 0 && data.itens.size() <= 100 &&
+             data.cliente is map &&
+             data.cliente.keys().hasOnly(['nome', 'telefone', 'endereco', 'observacoes']) &&
+             isNonEmptyString(data.cliente.nome, 120) &&
+             isNonEmptyString(data.cliente.telefone, 40) &&
+             (!('endereco' in data.cliente) || (data.cliente.endereco is string && data.cliente.endereco.size() <= 300)) &&
+             (!('observacoes' in data.cliente) || (data.cliente.observacoes is string && data.cliente.observacoes.size() <= 500)) &&
+             (data.clienteUid == null ||
+              (request.auth != null && data.clienteUid == request.auth.uid));
+    }
+
+    function isValidClienteWrite(data) {
+      return data.keys().hasOnly(['nome', 'telefone', 'email', 'foto', 'criadoEm', 'atualizadoEm']) &&
+             (!('nome' in data) || isNonEmptyString(data.nome, 120)) &&
+             (!('telefone' in data) || isNonEmptyString(data.telefone, 40)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 200)) &&
+             (!('foto' in data) || (data.foto is string && data.foto.size() <= 500));
+    }
+
+    function isValidProduto(data) {
+      return isNonEmptyString(data.nome, 150) &&
+             data.preco is number && data.preco >= 0 &&
+             data.estoque is number && data.estoque >= 0;
+    }
+
+    // Catálogo de produtos: qualquer visitante pode ler (vitrine
+    // pública), só administradores podem criar/editar/excluir — e mesmo
+    // um admin só consegue gravar um produto com formato válido.
+    match /produtos/{produtoId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidProduto(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // Pedidos: qualquer cliente pode CRIAR um pedido a partir do
+    // catálogo (checkout), desde que o conteúdo tenha o formato esperado
+    // e (se logado) o clienteUid bata com quem está autenticado — ninguém
+    // consegue criar pedido em nome de outra pessoa. Ninguém além dos
+    // administradores pode ler, listar, editar ou apagar pedidos —
+    // protege os dados pessoais dos clientes.
+    match /pedidos/{pedidoId} {
+      allow create: if isValidPedido(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Configurações da loja (nome, WhatsApp, Instagram, endereço,
+    // horário): leitura pública (usada na vitrine), escrita só
+    // para administradores.
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Categorias de produtos: leitura pública, escrita só para admins.
+    match /categorias/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Clientes: cada pessoa autenticada com Google só pode ler/escrever
+    // o PRÓPRIO cadastro (o id do documento é o uid dela), e só com um
+    // formato válido de nome/telefone/e-mail. Administradores podem ler
+    // e gerenciar todos os cadastros (aba "Clientes" do painel).
+    match /clientes/{uid} {
+      allow read: if (request.auth != null && request.auth.uid == uid) || isAdmin();
+      allow write: if isAdmin() ||
+        (request.auth != null && request.auth.uid == uid && isValidClienteWrite(request.resource.data));
+    }
+
+    // Bloqueia qualquer outra coleção não prevista acima.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
